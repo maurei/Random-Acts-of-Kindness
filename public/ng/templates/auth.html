@@ -1,0 +1,55 @@
+
+
+<div class="container">
+  <style type="text/css">
+    .container{
+      background: transparent;
+    }
+  </style>
+  <br><br>
+  <div class="wrapper">
+    <form class="form-signin">
+
+      <h2 class="form-signin-heading"></h2>
+      <input type="text" class="form-control" ng-model='credentials().email' placeholder="Email" required="" autofocus="" />
+      <input type="password" class="form-control" ng-model='credentials().password' placeholder="Password" required=""/>
+      <button class="btn btn-lg btn-primary btn-block" ng-click='submit()' id="hvr-buzz">Login</button>
+      <br>
+
+    </form>
+  </div>
+
+  <br>
+
+  <div class="wrapper">
+    <form class="form-signin">
+        <h2 class="form-signin-heading"></h2>
+        <input ng-model='registrationDetails().email' class="form-control" type="email" name="email" placeholder="Email">
+        <input ng-model='registrationDetails().username' class="form-control" type="username" name="username" placeholder="Username">
+        <input ng-model='registrationDetails().password' class="form-control" type="password" name="password" placeholder="Password">
+        <input ng-model='registrationDetails().password_confirm' class="form-control" type="password" name="password_confirm" placeholder="Confirm Password">
+        <a  ui-sref='register'><button class="btn btn-lg btn-primary btn-block" ng-click='submitRegister()' type="button" class="btn btn-default" id="hvr-buzz">REGISTER</button></a>
+    </form>
+  </div>
+</div>
+  <br>
+
+<div id="wrapper" aria-label="...">
+  <div role="group">
+    <a ui-sref='randomact'><button type="button" class="fancytext" id="hvr-buzz">
+
+<style type="text/css"> .fancytext{
+  color: white;
+  -webkit-text-stroke-width: 0.8px;
+  -webkit-text-stroke-color: black;
+}</style>
+
+  "Commit Random Act of Kindness Today"
+
+</button></a>
+  <div id="a_random_act">
+    {{task.description}}
+  </div>
+  </div>
+</div>
+<br>

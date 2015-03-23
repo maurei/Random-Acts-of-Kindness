@@ -1,0 +1,938 @@
+  [1m[36mSQL (30.3ms)[0m  [1mCREATE EXTENSION IF NOT EXISTS "plpgsql"[0m
+  [1m[35m (23.6ms)[0m  CREATE TABLE "assignments" ("id" serial primary key, "user_id" integer, "task_id" integer, "completed_on" timestamp, "created_at" timestamp, "updated_at" timestamp, "category_id" integer, "listing_id" integer) 
+  [1m[36m (29.7ms)[0m  [1mCREATE TABLE "categories" ("id" serial primary key, "name" character varying(255), "description" character varying(255), "cost_estimate" integer, "score" integer DEFAULT 0, "public" boolean DEFAULT 't', "user_id" integer, "created_at" timestamp, "updated_at" timestamp) [0m
+  [1m[35m (2.1ms)[0m  CREATE TABLE "listings" ("id" serial primary key, "category_id" integer, "task_id" integer, "created_at" timestamp, "updated_at" timestamp) 
+  [1m[36m (2.6ms)[0m  [1mCREATE TABLE "relationships" ("id" serial primary key, "user_id" integer, "follower_id" integer, "created_at" timestamp, "updated_at" timestamp) [0m
+  [1m[35m (2.5ms)[0m  CREATE TABLE "subscriptions" ("id" serial primary key, "amount" integer, "period" integer, "user_id" integer, "category_id" integer, "created_at" timestamp, "updated_at" timestamp) 
+  [1m[36m (1.2ms)[0m  [1mCREATE  INDEX  "index_subscriptions_on_category_id" ON "subscriptions" USING btree ("category_id")[0m
+  [1m[35m (1.5ms)[0m  CREATE  INDEX  "index_subscriptions_on_user_id" ON "subscriptions" USING btree ("user_id")
+  [1m[36m (3.3ms)[0m  [1mCREATE TABLE "tasks" ("id" serial primary key, "name" character varying(255), "description" character varying(255), "cost_estimate" integer, "score" integer DEFAULT 0, "public" boolean DEFAULT 't', "user_id" integer, "created_at" timestamp, "updated_at" timestamp) [0m
+  [1m[35m (3.8ms)[0m  CREATE TABLE "users" ("id" serial primary key, "email" character varying(255), "password_hash" character varying(255), "username" character varying(255), "created_at" timestamp, "updated_at" timestamp) 
+  [1m[36m (3.4ms)[0m  [1mCREATE TABLE "votes" ("id" serial primary key, "user_id" integer, "votable_id" integer, "votable_type" character varying(255), "magnitude" integer, "created_at" timestamp, "updated_at" timestamp) [0m
+  [1m[35m (1.5ms)[0m  CREATE  INDEX  "index_votes_on_votable_id_and_votable_type" ON "votes" USING btree ("votable_id", "votable_type")
+  [1m[36m (1.0ms)[0m  [1mCREATE TABLE "schema_migrations" ("version" character varying(255) NOT NULL) [0m
+  [1m[35m (1.3ms)[0m  CREATE UNIQUE INDEX  "unique_schema_migrations" ON "schema_migrations"  ("version")
+  [1m[36m (0.8ms)[0m  [1mSELECT version FROM "schema_migrations"[0m
+  [1m[35m (1.8ms)[0m  INSERT INTO "schema_migrations" (version) VALUES ('20150306195004')
+  [1m[36m (0.5ms)[0m  [1mINSERT INTO "schema_migrations" (version) VALUES ('20150305222610')[0m
+  [1m[35m (0.3ms)[0m  INSERT INTO "schema_migrations" (version) VALUES ('20150305222701')
+  [1m[36m (0.3ms)[0m  [1mINSERT INTO "schema_migrations" (version) VALUES ('20150305222729')[0m
+  [1m[35m (0.4ms)[0m  INSERT INTO "schema_migrations" (version) VALUES ('20150305222744')
+  [1m[36m (0.4ms)[0m  [1mINSERT INTO "schema_migrations" (version) VALUES ('20150305222749')[0m
+  [1m[35m (0.3ms)[0m  INSERT INTO "schema_migrations" (version) VALUES ('20150305230101')
+  [1m[36m (0.3ms)[0m  [1mINSERT INTO "schema_migrations" (version) VALUES ('20150306003351')[0m
+  [1m[35m (0.4ms)[0m  INSERT INTO "schema_migrations" (version) VALUES ('20150306163922')
+  [1m[36m (0.5ms)[0m  [1mINSERT INTO "schema_migrations" (version) VALUES ('20150306164017')[0m
+  [1m[35mActiveRecord::SchemaMigration Load (0.3ms)[0m  SELECT "schema_migrations".* FROM "schema_migrations"
+  [1m[36m (6.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.9ms)[0m  DELETE FROM "users"
+  [1m[36mSQL (0.4ms)[0m  [1mDELETE FROM "categories"[0m
+  [1m[35mSQL (0.4ms)[0m  DELETE FROM "tasks"
+  [1m[36mSQL (0.4ms)[0m  [1mDELETE FROM "subscriptions"[0m
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.3ms)[0m  DELETE FROM "users"
+  [1m[36mSQL (0.3ms)[0m  [1mDELETE FROM "categories"[0m
+  [1m[35mSQL (0.3ms)[0m  DELETE FROM "tasks"
+  [1m[36mSQL (0.2ms)[0m  [1mDELETE FROM "subscriptions"[0m
+  [1m[35m (0.9ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (19.2ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person1@place.com' LIMIT 1[0m
+  [1m[35mSQL (1.2ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:18.423000"], ["email", "test_person1@place.com"], ["password_hash", "$2a$10$fMzgMgao1klNZz9JqPx3MuphD4esrpfUuvqVidgA1vDaU9z6FyOZa"], ["updated_at", "2015-03-13 00:05:18.423000"], ["username", "stuffs"]]
+  [1m[36m (0.3ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Processing by ApplicationController#login as HTML
+  Parameters: {"credentials"=>{"email"=>"test_person1@place.com", "password"=>"[FILTERED]"}}
+  [1m[35mUser Load (13.3ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."email" = 'test_person1@place.com' LIMIT 1
+Completed 200 OK in 102ms (Views: 0.7ms | ActiveRecord: 13.3ms)
+  [1m[36m (0.5ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.3ms)[0m  [1mDELETE FROM "users"[0m
+  [1m[35mSQL (0.3ms)[0m  DELETE FROM "categories"
+  [1m[36mSQL (0.2ms)[0m  [1mDELETE FROM "tasks"[0m
+  [1m[35mSQL (0.2ms)[0m  DELETE FROM "subscriptions"
+  [1m[36m (0.4ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.5ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person2@place.com' LIMIT 1
+  [1m[36mSQL (0.4ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:18.627577"], ["email", "test_person2@place.com"], ["password_hash", "$2a$10$WkF3/KVIawhFjo6cbqV9XeYS0SgnXu5U/Q16E9309pxkde5sAyxIC"], ["updated_at", "2015-03-13 00:05:18.627577"], ["username", "stuffs"]]
+  [1m[35m (0.3ms)[0m  RELEASE SAVEPOINT active_record_1
+Processing by ApplicationController#login as HTML
+  Parameters: {"credentials"=>{"email"=>"test_person2@place.com", "password"=>"[FILTERED]"}}
+  [1m[36mUser Load (0.4ms)[0m  [1mSELECT  "users".* FROM "users"  WHERE "users"."email" = 'test_person2@place.com' LIMIT 1[0m
+Completed 200 OK in 83ms (Views: 0.3ms | ActiveRecord: 0.4ms)
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.5ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person3@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:18.805820"], ["email", "test_person3@place.com"], ["password_hash", "$2a$10$xn7OxnhbBXVJaHdVXXdh..asXsuzxlhEXxY4N6/7VBi1Kq3gXHSWS"], ["updated_at", "2015-03-13 00:05:18.805820"], ["username", "stuffs"]]
+  [1m[36m (0.3ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Processing by AssignmentsController#index as HTML
+  Parameters: {"user_id"=>"3"}
+  [1m[35mUser Load (0.6ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1  [["id", 3]]
+  [1m[36mAssignment Load (0.4ms)[0m  [1mSELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = $1[0m  [["user_id", 3]]
+Completed 200 OK in 21ms (Views: 0.2ms | ActiveRecord: 2.2ms)
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.4ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person4@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:18.924451"], ["email", "test_person4@place.com"], ["password_hash", "$2a$10$0jJsi3hcgI/vBnhzebgqIO25iVHlPxZn.s/.ctCJSV0JkAEsJS33q"], ["updated_at", "2015-03-13 00:05:18.924451"], ["username", "stuffs"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.5ms)[0m  [1mINSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:18.936773"], ["description", "a nice thing"], ["name", "test_category1"], ["public", "f"], ["updated_at", "2015-03-13 00:05:18.936773"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.5ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:18.955921"], ["description", "a nice thing"], ["name", "test_task1"], ["public", "f"], ["updated_at", "2015-03-13 00:05:18.955921"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.6ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 1], ["created_at", "2015-03-13 00:05:18.969960"], ["task_id", 1], ["updated_at", "2015-03-13 00:05:18.969960"]]
+  [1m[35m (0.3ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.5ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:18.973894"], ["description", "a nice thing"], ["name", "test_task2"], ["public", "f"], ["updated_at", "2015-03-13 00:05:18.973894"]]
+  [1m[36m (0.3ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 1], ["created_at", "2015-03-13 00:05:18.977198"], ["task_id", 2], ["updated_at", "2015-03-13 00:05:18.977198"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:18.979516"], ["description", "a nice thing"], ["name", "test_task3"], ["public", "f"], ["updated_at", "2015-03-13 00:05:18.979516"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 1], ["created_at", "2015-03-13 00:05:18.982017"], ["task_id", 3], ["updated_at", "2015-03-13 00:05:18.982017"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.4ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:18.984308"], ["description", "a nice thing"], ["name", "test_task4"], ["public", "f"], ["updated_at", "2015-03-13 00:05:18.984308"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 1], ["created_at", "2015-03-13 00:05:18.987734"], ["task_id", 4], ["updated_at", "2015-03-13 00:05:18.987734"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:18.990122"], ["description", "a nice thing"], ["name", "test_task5"], ["public", "f"], ["updated_at", "2015-03-13 00:05:18.990122"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 1], ["created_at", "2015-03-13 00:05:18.992672"], ["task_id", 5], ["updated_at", "2015-03-13 00:05:18.992672"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.6ms)[0m  INSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["amount", 3], ["category_id", 1], ["created_at", "2015-03-13 00:05:19.308647"], ["period", 1], ["updated_at", "2015-03-13 00:05:19.308647"], ["user_id", 4]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.4ms)[0m  SELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1  [["id", 1]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1[0m  [["category_id", 1]]
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 3]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 3]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 3]]
+  [1m[36m (0.4ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.5ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 1], ["created_at", "2015-03-13 00:05:19.374713"], ["task_id", 3], ["updated_at", "2015-03-13 00:05:19.374713"], ["user_id", 4]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 4]]
+  [1m[36mListing Load (0.4ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 4]]
+  [1m[35mListing Load (0.3ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 4]]
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 1], ["created_at", "2015-03-13 00:05:19.381859"], ["task_id", 4], ["updated_at", "2015-03-13 00:05:19.381859"], ["user_id", 4]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 2]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 2]]
+  [1m[35mListing Load (0.3ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 2]]
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 1], ["created_at", "2015-03-13 00:05:19.386404"], ["task_id", 2], ["updated_at", "2015-03-13 00:05:19.386404"], ["user_id", 4]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mAssignment Load (0.5ms)[0m  SELECT  "assignments".* FROM "assignments"   ORDER BY "assignments"."id" DESC LIMIT 1
+Processing by AssignmentsController#complete as HTML
+  Parameters: {"id"=>"3"}
+  [1m[36mAssignment Load (0.4ms)[0m  [1mSELECT  "assignments".* FROM "assignments"  WHERE "assignments"."id" = $1 LIMIT 1[0m  [["id", 3]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE "assignments" SET "completed_on" = $1, "updated_at" = $2 WHERE "assignments"."id" = 3[0m  [["completed_on", "2015-03-13 00:05:19.392389"], ["updated_at", "2015-03-13 00:05:19.393792"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 6ms (Views: 0.3ms | ActiveRecord: 1.0ms)
+  [1m[36mAssignment Load (0.3ms)[0m  [1mSELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = 4 AND "assignments"."completed_on" IS NULL[0m
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 3]]
+  [1m[36mVote Load (0.5ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 3 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 4 LIMIT 1[0m
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 4]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 4 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 4 LIMIT 1[0m
+Processing by AssignmentsController#index as HTML
+  Parameters: {"user_id"=>"4"}
+  [1m[35mUser Load (0.3ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1  [["id", 4]]
+  [1m[36mAssignment Load (0.3ms)[0m  [1mSELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = $1[0m  [["user_id", 4]]
+  [1m[35mTask Load (0.5ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 2]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 2 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 4 LIMIT 1[0m
+Completed 200 OK in 6ms (Views: 0.3ms | ActiveRecord: 2.5ms)
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.4ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person5@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:19.502766"], ["email", "test_person5@place.com"], ["password_hash", "$2a$10$.LEcPZ/XhRKGCiXfKVjLNu9yqBhbaDqFudf7t047pJFimeROB2C0K"], ["updated_at", "2015-03-13 00:05:19.502766"], ["username", "stuffs"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.505590"], ["description", "a nice thing"], ["name", "test_category2"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.505590"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.508673"], ["description", "a nice thing"], ["name", "test_task6"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.508673"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.512339"], ["task_id", 6], ["updated_at", "2015-03-13 00:05:19.512339"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.514784"], ["description", "a nice thing"], ["name", "test_task7"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.514784"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.517558"], ["task_id", 7], ["updated_at", "2015-03-13 00:05:19.517558"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.519778"], ["description", "a nice thing"], ["name", "test_task8"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.519778"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.522788"], ["task_id", 8], ["updated_at", "2015-03-13 00:05:19.522788"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.525092"], ["description", "a nice thing"], ["name", "test_task9"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.525092"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.527685"], ["task_id", 9], ["updated_at", "2015-03-13 00:05:19.527685"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.530633"], ["description", "a nice thing"], ["name", "test_task10"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.530633"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.533281"], ["task_id", 10], ["updated_at", "2015-03-13 00:05:19.533281"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.4ms)[0m  INSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["amount", 3], ["category_id", 2], ["created_at", "2015-03-13 00:05:19.535225"], ["period", 1], ["updated_at", "2015-03-13 00:05:19.535225"], ["user_id", 5]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.4ms)[0m  SELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1  [["id", 2]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1[0m  [["category_id", 2]]
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 9]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 9]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 9]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.542910"], ["task_id", 9], ["updated_at", "2015-03-13 00:05:19.542910"], ["user_id", 5]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 10]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 10]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 10]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.547210"], ["task_id", 10], ["updated_at", "2015-03-13 00:05:19.547210"], ["user_id", 5]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 6]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 6]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 6]]
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 2], ["created_at", "2015-03-13 00:05:19.551512"], ["task_id", 6], ["updated_at", "2015-03-13 00:05:19.551512"], ["user_id", 5]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mAssignment Load (0.3ms)[0m  SELECT  "assignments".* FROM "assignments"   ORDER BY "assignments"."id" DESC LIMIT 1
+Processing by AssignmentsController#complete as HTML
+  Parameters: {"id"=>"6"}
+  [1m[36mAssignment Load (0.4ms)[0m  [1mSELECT  "assignments".* FROM "assignments"  WHERE "assignments"."id" = $1 LIMIT 1[0m  [["id", 6]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE "assignments" SET "completed_on" = $1, "updated_at" = $2 WHERE "assignments"."id" = 6[0m  [["completed_on", "2015-03-13 00:05:19.557372"], ["updated_at", "2015-03-13 00:05:19.558133"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 4ms (Views: 0.2ms | ActiveRecord: 1.1ms)
+  [1m[36mAssignment Load (0.4ms)[0m  [1mSELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = 5 AND "assignments"."completed_on" IS NULL[0m
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 9]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 9 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 5 LIMIT 1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 10]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 10 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 5 LIMIT 1[0m
+  [1m[35m (0.4ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.8ms)[0m  [1mINSERT INTO "votes" ("created_at", "magnitude", "updated_at", "user_id", "votable_id", "votable_type") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:19.572273"], ["magnitude", 1], ["updated_at", "2015-03-13 00:05:19.572273"], ["user_id", 5], ["votable_id", 6], ["votable_type", "Task"]]
+  [1m[35m (0.3ms)[0m  RELEASE SAVEPOINT active_record_1
+Processing by AssignmentsController#index as HTML
+  Parameters: {"user_id"=>"5"}
+  [1m[36mUser Load (0.5ms)[0m  [1mSELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1[0m  [["id", 5]]
+  [1m[35mAssignment Load (0.4ms)[0m  SELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = $1  [["user_id", 5]]
+  [1m[36mTask Load (0.3ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 6]]
+  [1m[35mVote Load (0.6ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 6 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 5 LIMIT 1
+Completed 200 OK in 6ms (Views: 0.3ms | ActiveRecord: 2.9ms)
+  [1m[36m (0.3ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.3ms)[0m  BEGIN
+  [1m[36m (0.5ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.6ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person6@place.com' LIMIT 1
+  [1m[36mSQL (0.5ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:19.675631"], ["email", "test_person6@place.com"], ["password_hash", "$2a$10$D2vscs37PH.PRbqw.4eRLOATPc2XTK7/CWtoD0.mvnpr2U.r6/Q4u"], ["updated_at", "2015-03-13 00:05:19.675631"], ["username", "stuffs"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.5ms)[0m  INSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.678516"], ["description", "a nice thing"], ["name", "test_category3"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.678516"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.681709"], ["description", "a nice thing"], ["name", "test_task11"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.681709"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.684464"], ["task_id", 11], ["updated_at", "2015-03-13 00:05:19.684464"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.686707"], ["description", "a nice thing"], ["name", "test_task12"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.686707"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.689449"], ["task_id", 12], ["updated_at", "2015-03-13 00:05:19.689449"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.691769"], ["description", "a nice thing"], ["name", "test_task13"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.691769"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.694228"], ["task_id", 13], ["updated_at", "2015-03-13 00:05:19.694228"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.696441"], ["description", "a nice thing"], ["name", "test_task14"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.696441"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.698992"], ["task_id", 14], ["updated_at", "2015-03-13 00:05:19.698992"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.701158"], ["description", "a nice thing"], ["name", "test_task15"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.701158"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.703582"], ["task_id", 15], ["updated_at", "2015-03-13 00:05:19.703582"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["amount", 3], ["category_id", 3], ["created_at", "2015-03-13 00:05:19.705697"], ["period", 1], ["updated_at", "2015-03-13 00:05:19.705697"], ["user_id", 6]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mCategory Load (0.3ms)[0m  [1mSELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1[0m  [["id", 3]]
+  [1m[35mListing Load (0.3ms)[0m  SELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1  [["category_id", 3]]
+  [1m[36mTask Load (0.3ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 11]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 11]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 11]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.712566"], ["task_id", 11], ["updated_at", "2015-03-13 00:05:19.712566"], ["user_id", 6]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mTask Load (0.2ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 15]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 15]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 15]]
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.716603"], ["task_id", 15], ["updated_at", "2015-03-13 00:05:19.716603"], ["user_id", 6]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mTask Load (0.2ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 12]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 12]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 12]]
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["category_id", 3], ["created_at", "2015-03-13 00:05:19.720598"], ["task_id", 12], ["updated_at", "2015-03-13 00:05:19.720598"], ["user_id", 6]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mAssignment Load (0.3ms)[0m  [1mSELECT  "assignments".* FROM "assignments"   ORDER BY "assignments"."id" DESC LIMIT 1[0m
+Processing by AssignmentsController#complete as HTML
+  Parameters: {"id"=>"9"}
+  [1m[35mAssignment Load (0.3ms)[0m  SELECT  "assignments".* FROM "assignments"  WHERE "assignments"."id" = $1 LIMIT 1  [["id", 9]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  UPDATE "assignments" SET "completed_on" = $1, "updated_at" = $2 WHERE "assignments"."id" = 9  [["completed_on", "2015-03-13 00:05:19.725505"], ["updated_at", "2015-03-13 00:05:19.726354"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Completed 200 OK in 4ms (Views: 0.2ms | ActiveRecord: 1.0ms)
+  [1m[35mAssignment Load (0.4ms)[0m  SELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = 6 AND "assignments"."completed_on" IS NULL
+  [1m[36mTask Load (0.3ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 11]]
+  [1m[35mVote Load (0.4ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 11 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 6 LIMIT 1
+  [1m[36mTask Load (0.2ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 15]]
+  [1m[35mVote Load (0.4ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 15 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 6 LIMIT 1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "votes" ("created_at", "magnitude", "updated_at", "user_id", "votable_id", "votable_type") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["created_at", "2015-03-13 00:05:19.734361"], ["magnitude", -1], ["updated_at", "2015-03-13 00:05:19.734361"], ["user_id", 6], ["votable_id", 12], ["votable_type", "Task"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Processing by AssignmentsController#index as HTML
+  Parameters: {"user_id"=>"6"}
+  [1m[35mUser Load (0.3ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1  [["id", 6]]
+  [1m[36mAssignment Load (0.3ms)[0m  [1mSELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = $1[0m  [["user_id", 6]]
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 12]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 12 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 6 LIMIT 1[0m
+Completed 200 OK in 5ms (Views: 0.3ms | ActiveRecord: 2.4ms)
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.4ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.6ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person7@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:19.832405"], ["email", "test_person7@place.com"], ["password_hash", "$2a$10$nf8pca6DcnpM8dnsJIHjFOXO8WwXpPthEUwXtODtPupoq0MLAGjRK"], ["updated_at", "2015-03-13 00:05:19.832405"], ["username", "stuffs"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.835183"], ["description", "a nice thing"], ["name", "test_category4"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.835183"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.838296"], ["description", "a nice thing"], ["name", "test_task16"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.838296"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.841403"], ["task_id", 16], ["updated_at", "2015-03-13 00:05:19.841403"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.843774"], ["description", "a nice thing"], ["name", "test_task17"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.843774"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.846362"], ["task_id", 17], ["updated_at", "2015-03-13 00:05:19.846362"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.848740"], ["description", "a nice thing"], ["name", "test_task18"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.848740"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.851503"], ["task_id", 18], ["updated_at", "2015-03-13 00:05:19.851503"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.853817"], ["description", "a nice thing"], ["name", "test_task19"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.853817"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.856852"], ["task_id", 19], ["updated_at", "2015-03-13 00:05:19.856852"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:19.859534"], ["description", "a nice thing"], ["name", "test_task20"], ["public", "f"], ["updated_at", "2015-03-13 00:05:19.859534"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.862230"], ["task_id", 20], ["updated_at", "2015-03-13 00:05:19.862230"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["amount", 3], ["category_id", 4], ["created_at", "2015-03-13 00:05:19.864351"], ["period", 1], ["updated_at", "2015-03-13 00:05:19.864351"], ["user_id", 7]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.3ms)[0m  SELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1  [["id", 4]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1[0m  [["category_id", 4]]
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 18]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 18]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 18]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.871282"], ["task_id", 18], ["updated_at", "2015-03-13 00:05:19.871282"], ["user_id", 7]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 20]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 20]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 20]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.875718"], ["task_id", 20], ["updated_at", "2015-03-13 00:05:19.875718"], ["user_id", 7]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 19]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 19]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 19]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 4], ["created_at", "2015-03-13 00:05:19.880025"], ["task_id", 19], ["updated_at", "2015-03-13 00:05:19.880025"], ["user_id", 7]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mAssignment Load (0.3ms)[0m  SELECT  "assignments".* FROM "assignments"   ORDER BY "assignments"."id" DESC LIMIT 1
+  [1m[36mAssignment Load (0.5ms)[0m  [1mSELECT  "assignments".* FROM "assignments"   ORDER BY "assignments"."id" DESC LIMIT 1[0m
+Processing by AssignmentsController#complete as HTML
+  Parameters: {"id"=>"12"}
+  [1m[35mAssignment Load (0.4ms)[0m  SELECT  "assignments".* FROM "assignments"  WHERE "assignments"."id" = $1 LIMIT 1  [["id", 12]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  UPDATE "assignments" SET "completed_on" = $1, "updated_at" = $2 WHERE "assignments"."id" = 12  [["completed_on", "2015-03-13 00:05:19.890733"], ["updated_at", "2015-03-13 00:05:19.891477"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Completed 200 OK in 4ms (Views: 0.3ms | ActiveRecord: 1.1ms)
+  [1m[35mAssignment Load (0.3ms)[0m  SELECT  "assignments".* FROM "assignments"   ORDER BY "assignments"."id" DESC LIMIT 1
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.2ms)[0m  BEGIN
+Processing by CategoriesController#index as HTML
+  [1m[36m (0.4ms)[0m  [1mSELECT COUNT(*) FROM "users"  WHERE "users"."id" IS NULL[0m
+  [1m[35mCategory Load (0.4ms)[0m  SELECT "categories".* FROM "categories"  WHERE "categories"."public" = 't'
+Completed 200 OK in 3ms (Views: 0.6ms | ActiveRecord: 0.8ms)
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.4ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person8@place.com' LIMIT 1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:19.995108"], ["email", "test_person8@place.com"], ["password_hash", "$2a$10$dJfpe5Fc1jkuhBAP2dv5.OPGppWiHcGI5vqH6t4LiAkFq1ew/ld/6"], ["updated_at", "2015-03-13 00:05:19.995108"], ["username", "stuffs"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+Processing by CategoriesController#index as HTML
+  Parameters: {"user_id"=>"8"}
+  [1m[36m (0.4ms)[0m  [1mSELECT COUNT(*) FROM "users"  WHERE "users"."id" = 8[0m
+  [1m[35mUser Load (0.3ms)[0m  SELECT "users".* FROM "users"  WHERE "users"."id" = 8
+  [1m[36mSubscription Load (0.3ms)[0m  [1mSELECT "subscriptions".* FROM "subscriptions"  WHERE "subscriptions"."user_id" = $1[0m  [["user_id", 8]]
+  [1m[35mCategory Load (0.3ms)[0m  SELECT "categories".* FROM "categories"  WHERE "categories"."public" = 't'
+Completed 200 OK in 6ms (Views: 0.2ms | ActiveRecord: 1.3ms)
+  [1m[36m (0.3ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.4ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person9@place.com' LIMIT 1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.096216"], ["email", "test_person9@place.com"], ["password_hash", "$2a$10$rat114ZQou5OIkUF5SkZHOapKFnhlPs411jzYstkTUGx1rKFAlAHW"], ["updated_at", "2015-03-13 00:05:20.096216"], ["username", "stuffs"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.099096"], ["description", "a nice thing"], ["name", "test_category5"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.099096"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.4ms)[0m  SELECT  "categories".* FROM "categories"   ORDER BY "categories"."id" ASC LIMIT 1
+Processing by CategoriesController#subscribe as HTML
+  Parameters: {"amount"=>"3", "period"=>"1", "user_id"=>"9", "id"=>"5"}
+  [1m[36mUser Load (0.4ms)[0m  [1mSELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1[0m  [["id", 9]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["amount", 3], ["category_id", 5], ["created_at", "2015-03-13 00:05:20.105951"], ["period", 1], ["updated_at", "2015-03-13 00:05:20.105951"], ["user_id", 9]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mCategory Load (0.3ms)[0m  [1mSELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1[0m  [["id", 5]]
+  [1m[35mListing Load (0.3ms)[0m  SELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1  [["category_id", 5]]
+Completed 200 OK in 7ms (Views: 0.3ms | ActiveRecord: 1.7ms)
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.2ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.4ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.6ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person10@place.com' LIMIT 1
+  [1m[36mSQL (0.5ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.206340"], ["email", "test_person10@place.com"], ["password_hash", "$2a$10$aEe4X1ZiIp67LlXOGsMAd.d1Nl7BS7EYCHAXvn1Hc/c4jZq40nveq"], ["updated_at", "2015-03-13 00:05:20.206340"], ["username", "stuffs"]]
+  [1m[35m (0.3ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.210023"], ["description", "a nice thing"], ["name", "test_category6"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.210023"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.3ms)[0m  SELECT  "categories".* FROM "categories"   ORDER BY "categories"."id" ASC LIMIT 1
+  [1m[36m (0.3ms)[0m  [1mSELECT COUNT(*) FROM "subscriptions"[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["amount", 3], ["category_id", 6], ["created_at", "2015-03-13 00:05:20.214270"], ["period", 1], ["updated_at", "2015-03-13 00:05:20.214270"], ["user_id", 10]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mCategory Load (0.3ms)[0m  [1mSELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1[0m  [["id", 6]]
+  [1m[35mListing Load (0.3ms)[0m  SELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1  [["category_id", 6]]
+  [1m[36mSubscription Load (0.3ms)[0m  [1mSELECT  "subscriptions".* FROM "subscriptions"   ORDER BY "subscriptions"."id" DESC LIMIT 1[0m
+Processing by SubscriptionsController#destroy as HTML
+  Parameters: {"user_id"=>"10", "id"=>"6"}
+  [1m[35mSQL (0.4ms)[0m  DELETE FROM "subscriptions" WHERE "subscriptions"."id" = 6
+Completed 200 OK in 1ms (Views: 0.2ms | ActiveRecord: 0.4ms)
+  [1m[36m (0.3ms)[0m  [1mSELECT COUNT(*) FROM "subscriptions"[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+Processing by TasksController#random as HTML
+  [1m[35m (0.4ms)[0m  SELECT COUNT(*) FROM "tasks"
+  [1m[36mTask Load (0.5ms)[0m  [1mSELECT  "tasks".* FROM "tasks"   ORDER BY "tasks"."id" ASC LIMIT 1 OFFSET 0[0m
+Completed 200 OK in 4ms (Views: 0.4ms | ActiveRecord: 0.9ms)
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.237249"], ["description", "a nice thing"], ["name", "test_task21"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.237249"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.239927"], ["description", "a nice thing"], ["name", "test_task22"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.239927"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.242463"], ["description", "a nice thing"], ["name", "test_task23"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.242463"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.244741"], ["description", "a nice thing"], ["name", "test_task24"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.244741"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.246966"], ["description", "a nice thing"], ["name", "test_task25"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.246966"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.249148"], ["description", "a nice thing"], ["name", "test_task26"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.249148"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.251515"], ["description", "a nice thing"], ["name", "test_task27"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.251515"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.253862"], ["description", "a nice thing"], ["name", "test_task28"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.253862"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.256093"], ["description", "a nice thing"], ["name", "test_task29"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.256093"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.258853"], ["description", "a nice thing"], ["name", "test_task30"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.258853"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.261754"], ["description", "a nice thing"], ["name", "test_task31"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.261754"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.264159"], ["description", "a nice thing"], ["name", "test_task32"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.264159"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.266434"], ["description", "a nice thing"], ["name", "test_task33"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.266434"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.268740"], ["description", "a nice thing"], ["name", "test_task34"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.268740"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.271008"], ["description", "a nice thing"], ["name", "test_task35"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.271008"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.273316"], ["description", "a nice thing"], ["name", "test_task36"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.273316"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.276521"], ["description", "a nice thing"], ["name", "test_task37"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.276521"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.279752"], ["description", "a nice thing"], ["name", "test_task38"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.279752"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.282035"], ["description", "a nice thing"], ["name", "test_task39"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.282035"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.284328"], ["description", "a nice thing"], ["name", "test_task40"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.284328"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.286506"], ["description", "a nice thing"], ["name", "test_task41"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.286506"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.288733"], ["description", "a nice thing"], ["name", "test_task42"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.288733"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.290973"], ["description", "a nice thing"], ["name", "test_task43"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.290973"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.293523"], ["description", "a nice thing"], ["name", "test_task44"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.293523"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.295844"], ["description", "a nice thing"], ["name", "test_task45"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.295844"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.298124"], ["description", "a nice thing"], ["name", "test_task46"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.298124"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.300354"], ["description", "a nice thing"], ["name", "test_task47"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.300354"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.302614"], ["description", "a nice thing"], ["name", "test_task48"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.302614"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.304959"], ["description", "a nice thing"], ["name", "test_task49"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.304959"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.307342"], ["description", "a nice thing"], ["name", "test_task50"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.307342"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Processing by TasksController#random as HTML
+  [1m[35m (0.4ms)[0m  SELECT COUNT(*) FROM "tasks"
+  [1m[36mTask Load (0.4ms)[0m  [1mSELECT  "tasks".* FROM "tasks"   ORDER BY "tasks"."id" ASC LIMIT 1 OFFSET 7[0m
+Completed 200 OK in 3ms (Views: 0.6ms | ActiveRecord: 0.7ms)
+Processing by TasksController#random as HTML
+  [1m[35m (0.4ms)[0m  SELECT COUNT(*) FROM "tasks"
+  [1m[36mTask Load (0.3ms)[0m  [1mSELECT  "tasks".* FROM "tasks"   ORDER BY "tasks"."id" ASC LIMIT 1 OFFSET 9[0m
+Completed 200 OK in 2ms (Views: 0.5ms | ActiveRecord: 1.4ms)
+Processing by TasksController#random as HTML
+  [1m[35m (0.4ms)[0m  SELECT COUNT(*) FROM "tasks"
+  [1m[36mTask Load (0.4ms)[0m  [1mSELECT  "tasks".* FROM "tasks"   ORDER BY "tasks"."id" ASC LIMIT 1 OFFSET 19[0m
+Completed 200 OK in 2ms (Views: 0.4ms | ActiveRecord: 2.2ms)
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+Processing by TasksController#create as HTML
+  Parameters: {"details"=>{}}
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("created_at", "public", "updated_at") VALUES ($1, $2, $3) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.326178"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.326178"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 4ms (Views: 0.2ms | ActiveRecord: 0.7ms)
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.3ms)[0m  [1mSELECT COUNT(*) FROM "tasks"[0m
+Processing by TasksController#create as HTML
+  Parameters: {"details"=>{"name"=>"bb94f", "description"=>"a thing", "cost_estimate"=>"5"}}
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 5], ["created_at", "2015-03-13 00:05:20.335450"], ["description", "a thing"], ["name", "bb94f"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.335450"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 3ms (Views: 0.2ms | ActiveRecord: 0.8ms)
+  [1m[36m (0.3ms)[0m  [1mSELECT COUNT(*) FROM "tasks"[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.6ms)[0m  SELECT COUNT(*) FROM "users"
+Processing by UsersController#create as HTML
+  Parameters: {"credentials"=>{"email"=>"test_person11@place.com", "password"=>"[FILTERED]", "password_confirm"=>"[FILTERED]"}}
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.4ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person11@place.com' LIMIT 1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.524205"], ["email", "test_person11@place.com"], ["password_hash", "$2a$10$Q6Jc8jd8i6l92SPst1Qlau2grdf/MnIcuEgZYqpzSCQYprY15fxCi"], ["updated_at", "2015-03-13 00:05:20.524205"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 91ms (Views: 0.2ms | ActiveRecord: 1.1ms)
+  [1m[36m (0.3ms)[0m  [1mSELECT COUNT(*) FROM "users"[0m
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.4ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person12@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:20.614790"], ["email", "test_person12@place.com"], ["password_hash", "$2a$10$sseOuTMRwlWt7du.8kYSdeNT8mbtIpJkl/4Zjnb/RoGOo3NipPmqK"], ["updated_at", "2015-03-13 00:05:20.614790"], ["username", "stuffs"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.617455"], ["description", "a nice thing"], ["name", "test_task51"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.617455"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+Processing by VotesController#cast_vote as HTML
+  Parameters: {"change"=>"-1", "user_id"=>"12", "class_name"=>"Task", "id"=>"53"}
+  [1m[36mVote Load (0.5ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 12 AND "votes"."votable_id" = 53 AND "votes"."votable_type" = 'Task' LIMIT 1[0m
+  [1m[35mUser Load (0.3ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1  [["id", 12]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = $1  ORDER BY "votes"."id" DESC LIMIT 10[0m  [["user_id", 12]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "votes" ("created_at", "magnitude", "updated_at", "user_id", "votable_id", "votable_type") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.627727"], ["magnitude", -10], ["updated_at", "2015-03-13 00:05:20.627727"], ["user_id", 12], ["votable_id", 53], ["votable_type", "Task"]]
+  [1m[35m (0.3ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 12 AND "votes"."votable_id" = 53 AND "votes"."votable_type" = 'Task' LIMIT 1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 53]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT "votes".* FROM "votes"  WHERE "votes"."votable_id" = $1 AND "votes"."votable_type" = $2[0m  [["votable_id", 53], ["votable_type", "Task"]]
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE "tasks" SET "score" = $1, "updated_at" = $2 WHERE "tasks"."id" = 53[0m  [["score", -10], ["updated_at", "2015-03-13 00:05:20.634543"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 16ms (Views: 0.6ms | ActiveRecord: 3.4ms)
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.4ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person13@place.com' LIMIT 1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.722240"], ["email", "test_person13@place.com"], ["password_hash", "$2a$10$fLkd5AbXo0MQIWh8x7FWJes5Y.qLVBdBsaEaeXaxVBSKMoqzkZR6."], ["updated_at", "2015-03-13 00:05:20.722240"], ["username", "stuffs"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.725199"], ["description", "a nice thing"], ["name", "test_task52"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.725199"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.3ms)[0m  SELECT  "tasks".* FROM "tasks"   ORDER BY "tasks"."id" DESC LIMIT 1
+Processing by VotesController#cast_vote as HTML
+  Parameters: {"change"=>"-1", "user_id"=>"13", "class_name"=>"Task", "id"=>"54"}
+  [1m[36mVote Load (0.5ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 13 AND "votes"."votable_id" = 54 AND "votes"."votable_type" = 'Task' LIMIT 1[0m
+  [1m[35mUser Load (0.3ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1  [["id", 13]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = $1  ORDER BY "votes"."id" DESC LIMIT 10[0m  [["user_id", 13]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "votes" ("created_at", "magnitude", "updated_at", "user_id", "votable_id", "votable_type") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.734333"], ["magnitude", -10], ["updated_at", "2015-03-13 00:05:20.734333"], ["user_id", 13], ["votable_id", 54], ["votable_type", "Task"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 13 AND "votes"."votable_id" = 54 AND "votes"."votable_type" = 'Task' LIMIT 1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 54]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT "votes".* FROM "votes"  WHERE "votes"."votable_id" = $1 AND "votes"."votable_type" = $2[0m  [["votable_id", 54], ["votable_type", "Task"]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE "tasks" SET "score" = $1, "updated_at" = $2 WHERE "tasks"."id" = 54[0m  [["score", -10], ["updated_at", "2015-03-13 00:05:20.739694"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 12ms (Views: 0.6ms | ActiveRecord: 3.4ms)
+  [1m[36mTask Load (0.4ms)[0m  [1mSELECT  "tasks".* FROM "tasks"   ORDER BY "tasks"."id" DESC LIMIT 1[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.4ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.6ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person14@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.4ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:20.829178"], ["email", "test_person14@place.com"], ["password_hash", "$2a$10$E/bpDNW2Q99LEQ.gyENWwuNEHtPoWshORQ4hFcBbvME3Vhd.AR0wC"], ["updated_at", "2015-03-13 00:05:20.829178"], ["username", "stuffs"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.4ms)[0m  [1mINSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.832191"], ["description", "a nice thing"], ["name", "test_category7"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.832191"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mCategory Load (0.3ms)[0m  [1mSELECT  "categories".* FROM "categories"   ORDER BY "categories"."id" DESC LIMIT 1[0m
+Processing by VotesController#cast_vote as HTML
+  Parameters: {"change"=>"-1", "user_id"=>"14", "class_name"=>"Category", "id"=>"7"}
+  [1m[35mVote Load (0.6ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 14 AND "votes"."votable_id" = 7 AND "votes"."votable_type" = 'Category' LIMIT 1
+  [1m[36mUser Load (0.3ms)[0m  [1mSELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1[0m  [["id", 14]]
+  [1m[35mVote Load (0.4ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = $1  ORDER BY "votes"."id" DESC LIMIT 10  [["user_id", 14]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.4ms)[0m  INSERT INTO "votes" ("created_at", "magnitude", "updated_at", "user_id", "votable_id", "votable_type") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["created_at", "2015-03-13 00:05:20.843889"], ["magnitude", -10], ["updated_at", "2015-03-13 00:05:20.843889"], ["user_id", 14], ["votable_id", 7], ["votable_type", "Category"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mVote Load (0.4ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 14 AND "votes"."votable_id" = 7 AND "votes"."votable_type" = 'Category' LIMIT 1
+  [1m[36mCategory Load (0.2ms)[0m  [1mSELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1[0m  [["id", 7]]
+  [1m[35mVote Load (0.4ms)[0m  SELECT "votes".* FROM "votes"  WHERE "votes"."votable_id" = $1 AND "votes"."votable_type" = $2  [["votable_id", 7], ["votable_type", "Category"]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  UPDATE "categories" SET "score" = $1, "updated_at" = $2 WHERE "categories"."id" = 7  [["score", -10], ["updated_at", "2015-03-13 00:05:20.851342"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Completed 200 OK in 17ms (Views: 0.6ms | ActiveRecord: 3.7ms)
+  [1m[35mCategory Load (0.4ms)[0m  SELECT  "categories".* FROM "categories"   ORDER BY "categories"."id" DESC LIMIT 1
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.3ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.4ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person15@place.com' LIMIT 1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:20.943407"], ["email", "test_person15@place.com"], ["password_hash", "$2a$10$MmyecbIBY/cmGS8AHi0OfO0Hkk1CzR1YqFkPbkhBUqwJmiRhljiwe"], ["updated_at", "2015-03-13 00:05:20.943407"], ["username", "stuffs"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:20.946357"], ["description", "a nice thing"], ["name", "test_task53"], ["public", "f"], ["updated_at", "2015-03-13 00:05:20.946357"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Processing by VotesController#cast_vote as HTML
+  Parameters: {"change"=>"-1", "user_id"=>"15", "class_name"=>"Task", "id"=>"55"}
+  [1m[35mVote Load (0.4ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 15 AND "votes"."votable_id" = 55 AND "votes"."votable_type" = 'Task' LIMIT 1
+  [1m[36mUser Load (0.3ms)[0m  [1mSELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1[0m  [["id", 15]]
+  [1m[35mVote Load (0.3ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = $1  ORDER BY "votes"."id" DESC LIMIT 10  [["user_id", 15]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "votes" ("created_at", "magnitude", "updated_at", "user_id", "votable_id", "votable_type") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["created_at", "2015-03-13 00:05:20.954196"], ["magnitude", -10], ["updated_at", "2015-03-13 00:05:20.954196"], ["user_id", 15], ["votable_id", 55], ["votable_type", "Task"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mVote Load (0.4ms)[0m  SELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 15 AND "votes"."votable_id" = 55 AND "votes"."votable_type" = 'Task' LIMIT 1
+  [1m[36mTask Load (0.3ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 55]]
+  [1m[35mVote Load (0.3ms)[0m  SELECT "votes".* FROM "votes"  WHERE "votes"."votable_id" = $1 AND "votes"."votable_type" = $2  [["votable_id", 55], ["votable_type", "Task"]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  UPDATE "tasks" SET "score" = $1, "updated_at" = $2 WHERE "tasks"."id" = 55  [["score", -10], ["updated_at", "2015-03-13 00:05:20.959398"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+Completed 200 OK in 12ms (Views: 0.9ms | ActiveRecord: 3.3ms)
+  [1m[35m (0.3ms)[0m  SELECT COUNT(*) FROM "votes"
+Processing by VotesController#cast_vote as HTML
+  Parameters: {"change"=>"1", "user_id"=>"15", "class_name"=>"Task", "id"=>"55"}
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 15 AND "votes"."votable_id" = 55 AND "votes"."votable_type" = 'Task' LIMIT 1[0m
+  [1m[35mUser Load (0.3ms)[0m  SELECT  "users".* FROM "users"  WHERE "users"."id" = $1 LIMIT 1  [["id", 15]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = $1  ORDER BY "votes"."id" DESC LIMIT 10[0m  [["user_id", 15]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE "votes" SET "magnitude" = $1, "updated_at" = $2 WHERE "votes"."id" = 6[0m  [["magnitude", 12], ["updated_at", "2015-03-13 00:05:20.968817"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."user_id" = 15 AND "votes"."votable_id" = 55 AND "votes"."votable_type" = 'Task' LIMIT 1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 55]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT "votes".* FROM "votes"  WHERE "votes"."votable_id" = $1 AND "votes"."votable_type" = $2[0m  [["votable_id", 55], ["votable_type", "Task"]]
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.4ms)[0m  [1mUPDATE "tasks" SET "score" = $1, "updated_at" = $2 WHERE "tasks"."id" = 55[0m  [["score", 12], ["updated_at", "2015-03-13 00:05:21.034133"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+Completed 200 OK in 72ms (Views: 0.6ms | ActiveRecord: 6.7ms)
+  [1m[36m (0.3ms)[0m  [1mSELECT COUNT(*) FROM "votes"[0m
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.3ms)[0m  SELECT COUNT(*) FROM "users"
+  [1m[36m (0.5ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.5ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = '0851@place.com' LIMIT 1
+  [1m[36mSQL (0.5ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:21.170963"], ["email", "0851@place.com"], ["password_hash", "$2a$10$K89xMLqxvZHT6Xu0K3uFsOhWeECcK1F1U2pDadZAmA8jnoWBOxXPm"], ["updated_at", "2015-03-13 00:05:21.170963"]]
+  [1m[35m (0.3ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.5ms)[0m  [1mSELECT COUNT(*) FROM "users"[0m
+  [1m[35m (0.4ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mUser Exists (0.4ms)[0m  [1mSELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person16@place.com' LIMIT 1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["created_at", "2015-03-13 00:05:21.260333"], ["email", "test_person16@place.com"], ["password_hash", "$2a$10$Y9oT5sbhgAoBzUYZYM4JNeHIv.CU3254rF9BjS.x./nePLEglDodG"], ["updated_at", "2015-03-13 00:05:21.260333"], ["username", "stuffs"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.262784"], ["description", "a nice thing"], ["name", "test_category9"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.262784"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mCategory Load (0.3ms)[0m  [1mSELECT  "categories".* FROM "categories"   ORDER BY "categories"."id" ASC LIMIT 1[0m
+  [1m[35m (0.3ms)[0m  SELECT COUNT(*) FROM "subscriptions"
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["amount", 3], ["category_id", 8], ["created_at", "2015-03-13 00:05:21.267097"], ["period", 1], ["updated_at", "2015-03-13 00:05:21.267097"], ["user_id", 17]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.2ms)[0m  SELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1  [["id", 8]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1[0m  [["category_id", 8]]
+  [1m[35m (0.3ms)[0m  SELECT COUNT(*) FROM "subscriptions"
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.3ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person17@place.com' LIMIT 1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:21.358407"], ["email", "test_person17@place.com"], ["password_hash", "$2a$10$WHCLLTs0M4VBAeiLZYtRVO9/kEl5SF9BC/Cnho0I6CNEQgNpAT/4m"], ["updated_at", "2015-03-13 00:05:21.358407"], ["username", "stuffs"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.360891"], ["description", "a nice thing"], ["name", "test_category10"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.360891"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.364115"], ["description", "a nice thing"], ["name", "test_task55"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.364115"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.367153"], ["task_id", 56], ["updated_at", "2015-03-13 00:05:21.367153"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.369425"], ["description", "a nice thing"], ["name", "test_task56"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.369425"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.372284"], ["task_id", 57], ["updated_at", "2015-03-13 00:05:21.372284"]]
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.374596"], ["description", "a nice thing"], ["name", "test_task57"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.374596"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.377149"], ["task_id", 58], ["updated_at", "2015-03-13 00:05:21.377149"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.379376"], ["description", "a nice thing"], ["name", "test_task58"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.379376"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.382380"], ["task_id", 59], ["updated_at", "2015-03-13 00:05:21.382380"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.384751"], ["description", "a nice thing"], ["name", "test_task59"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.384751"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.387402"], ["task_id", 60], ["updated_at", "2015-03-13 00:05:21.387402"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  SELECT COUNT(*) FROM "assignments"
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["amount", 3], ["category_id", 9], ["created_at", "2015-03-13 00:05:21.390213"], ["period", 1], ["updated_at", "2015-03-13 00:05:21.390213"], ["user_id", 18]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mCategory Load (0.3ms)[0m  SELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1  [["id", 9]]
+  [1m[36mListing Load (0.3ms)[0m  [1mSELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1[0m  [["category_id", 9]]
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 57]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 22]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 22]]
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.397055"], ["task_id", 57], ["updated_at", "2015-03-13 00:05:21.397055"], ["user_id", 18]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 56]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 21]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 21]]
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.401339"], ["task_id", 56], ["updated_at", "2015-03-13 00:05:21.401339"], ["user_id", 18]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 60]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 25]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 25]]
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["category_id", 9], ["created_at", "2015-03-13 00:05:21.405310"], ["task_id", 60], ["updated_at", "2015-03-13 00:05:21.405310"], ["user_id", 18]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.3ms)[0m  SELECT COUNT(*) FROM "assignments"
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mUser Exists (0.4ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person18@place.com' LIMIT 1
+  [1m[36mSQL (0.6ms)[0m  [1mINSERT INTO "users" ("created_at", "email", "password_hash", "updated_at", "username") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["created_at", "2015-03-13 00:05:21.493309"], ["email", "test_person18@place.com"], ["password_hash", "$2a$10$p8niCNX8CsGT.0kxvNKCIuRM964UrAiyTBPFY9NUxJC8XjswAyfUO"], ["updated_at", "2015-03-13 00:05:21.493309"], ["username", "stuffs"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "categories" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.496521"], ["description", "a nice thing"], ["name", "test_category11"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.496521"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.499868"], ["description", "a nice thing"], ["name", "test_task60"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.499868"]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.502679"], ["task_id", 61], ["updated_at", "2015-03-13 00:05:21.502679"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.504920"], ["description", "a nice thing"], ["name", "test_task61"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.504920"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.507533"], ["task_id", 62], ["updated_at", "2015-03-13 00:05:21.507533"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.509709"], ["description", "a nice thing"], ["name", "test_task62"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.509709"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.512329"], ["task_id", 63], ["updated_at", "2015-03-13 00:05:21.512329"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.514662"], ["description", "a nice thing"], ["name", "test_task63"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.514662"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.517405"], ["task_id", 64], ["updated_at", "2015-03-13 00:05:21.517405"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "tasks" ("cost_estimate", "created_at", "description", "name", "public", "updated_at") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["cost_estimate", 0], ["created_at", "2015-03-13 00:05:21.519630"], ["description", "a nice thing"], ["name", "test_task64"], ["public", "f"], ["updated_at", "2015-03-13 00:05:21.519630"]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO "listings" ("category_id", "created_at", "task_id", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id"  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.522137"], ["task_id", 65], ["updated_at", "2015-03-13 00:05:21.522137"]]
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO "subscriptions" ("amount", "category_id", "created_at", "period", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "id"[0m  [["amount", 3], ["category_id", 10], ["created_at", "2015-03-13 00:05:21.524191"], ["period", 1], ["updated_at", "2015-03-13 00:05:21.524191"], ["user_id", 19]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mCategory Load (0.2ms)[0m  [1mSELECT  "categories".* FROM "categories"  WHERE "categories"."id" = $1 LIMIT 1[0m  [["id", 10]]
+  [1m[35mListing Load (0.3ms)[0m  SELECT "listings".* FROM "listings"  WHERE "listings"."category_id" = $1  [["category_id", 10]]
+  [1m[36mTask Load (0.2ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 62]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 27]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 27]]
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.530617"], ["task_id", 62], ["updated_at", "2015-03-13 00:05:21.530617"], ["user_id", 19]]
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mTask Load (0.2ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 64]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 29]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 29]]
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.534924"], ["task_id", 64], ["updated_at", "2015-03-13 00:05:21.534924"], ["user_id", 19]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mTask Load (0.3ms)[0m  [1mSELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1[0m  [["id", 63]]
+  [1m[35mListing Load (0.2ms)[0m  SELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1  [["id", 28]]
+  [1m[36mListing Load (0.2ms)[0m  [1mSELECT  "listings".* FROM "listings"  WHERE "listings"."id" = $1 LIMIT 1[0m  [["id", 28]]
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO "assignments" ("category_id", "created_at", "task_id", "updated_at", "user_id") VALUES ($1, $2, $3, $4, $5) RETURNING "id"[0m  [["category_id", 10], ["created_at", "2015-03-13 00:05:21.538881"], ["task_id", 63], ["updated_at", "2015-03-13 00:05:21.538881"], ["user_id", 19]]
+  [1m[35m (0.2ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mAssignment Load (0.3ms)[0m  [1mSELECT "assignments".* FROM "assignments"  WHERE "assignments"."user_id" = 19 AND "assignments"."completed_on" IS NULL[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 62]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 62 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 19 LIMIT 1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 64]]
+  [1m[36mVote Load (0.3ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 64 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 19 LIMIT 1[0m
+  [1m[35mTask Load (0.2ms)[0m  SELECT  "tasks".* FROM "tasks"  WHERE "tasks"."id" = $1 LIMIT 1  [["id", 63]]
+  [1m[36mVote Load (0.4ms)[0m  [1mSELECT  "votes".* FROM "votes"  WHERE "votes"."votable_id" = 63 AND "votes"."votable_type" = 'Task' AND "votes"."user_id" = 19 LIMIT 1[0m
+  [1m[35m (0.3ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mUser Exists (0.6ms)[0m  SELECT  1 AS one FROM "users"  WHERE "users"."email" = 'test_person19@place.com' LIMIT 1
+  [1m[36m (0.3ms)[0m  [1mROLLBACK[0m
+  [1m[35m (0.2ms)[0m  BEGIN
+  [1m[36m (0.2ms)[0m  [1mROLLBACK[0m

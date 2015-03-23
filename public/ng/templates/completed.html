@@ -1,0 +1,34 @@
+
+<div class="container" id="container">
+    <ion-header-bar class="bar-energized">
+      <h1 class="title">User Profile</h1>
+    </ion-header-bar>
+    <ion-content>
+    <div class="card">
+      <div class="item item-divider" id="private_lists">
+        Completed Tasks
+        <div>
+          <completed-task ng-repeat="(assignmentId, task) in assignments"></completed-task>
+       </div>
+
+        <div class="item item-divider" id="private_lists">
+        Suggest a New Task?
+        <div>
+          <div>
+            <br>
+            <p>Task Name</p>
+            <input type="text" placeholder="Task Name" ng-model='newTaskDetails().name' class="smalltextbox">
+            <p> Task Description </p>
+            <textarea name="description" placeholder="Task Description" ng-model='newTaskDetails().description'></textarea>
+            <p> Cost Estimate</p>
+            <input type="text" placeholder="Task Cost Estimate" ng-model='newTaskDetails().cost_estimate' class="smalltextbox">
+            <button ng-click="submitNewTask()">Submit</button>
+          </div>
+       </div>
+      </div>
+      </div>
+
+
+  </div>
+</ion-content>
+
